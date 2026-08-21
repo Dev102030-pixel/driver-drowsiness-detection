@@ -7,6 +7,7 @@ import {
 } from '@mediapipe/tasks-vision';
 import { averageEAR, computeMAR, computeFaceVisibility, computeEyeGaze } from '@/lib/landmarks';
 import { logSessionReport, type SessionEvent } from '@/lib/storage';
+import { getSession } from '@/lib/auth';
 import { startAlarm, stopAlarm, speak, resumeAudio } from '@/lib/audio';
 
 export type DriverStatus = 'awake' | 'drowsy' | 'yawning' | 'no-face' | 'obscured' | 'distracted';
@@ -475,6 +476,7 @@ export function useDrowsinessDetection(
     
     // Log the session report before clearing
     if (startTimeRef.current && sessionIdRef.current) {
+      const session = getSession();
       void logSessionReport(
         sessionIdRef.current,
         startTimeRef.current,
@@ -485,7 +487,8 @@ export function useDrowsinessDetection(
         yawnCountRef.current,
         obscuredCountRef.current,
         distractedCountRef.current,
-        eventsRef.current
+        eventsRef.current,
+        session?.id ?? 'unknown'
       );
     }
 

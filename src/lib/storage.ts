@@ -8,6 +8,7 @@ export type SessionEvent = {
 export type SessionReport = {
   id: string;
   session_id: string;
+  driver_id: string;
   start_time: string;
   end_time: string;
   total_frames: number;
@@ -31,9 +32,13 @@ export function getSessionReports(): SessionReport[] {
   }
 }
 
-export async function fetchSessionReports(): Promise<SessionReport[]> {
+export async function fetchSessionReports(driverId?: string): Promise<SessionReport[]> {
   // Simulating async behavior to match old API
-  return getSessionReports().sort(
+  let reports = getSessionReports();
+  if (driverId) {
+    reports = reports.filter((r) => r.driver_id === driverId);
+  }
+  return reports.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 }
@@ -48,12 +53,14 @@ export async function logSessionReport(
   yawnCount: number,
   obscuredCount: number,
   distractedCount: number,
-  events: SessionEvent[]
+  events: SessionEvent[],
+  driverId: string
 ): Promise<void> {
   const reports = getSessionReports();
   const newReport: SessionReport = {
     id: crypto.randomUUID(),
     session_id: sessionId,
+    driver_id: driverId,
     start_time: new Date(startTime).toISOString(),
     end_time: new Date(endTime).toISOString(),
     total_frames: totalFrames,
